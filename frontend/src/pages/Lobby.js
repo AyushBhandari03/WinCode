@@ -60,18 +60,27 @@ export default function Lobby() {
     setTimeout(() => setStarting(false), 3000);
   };
 
-  const copyContestId = () => {
+  const copyToClipboard = (text, message) => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(contest.contestId);
+      navigator.clipboard.writeText(text);
     } else {
       const el = document.createElement('textarea');
-      el.value = contest.contestId;
+      el.value = text;
       document.body.appendChild(el);
       el.select();
       document.execCommand('copy');
       document.body.removeChild(el);
     }
-    alert('Contest ID copied!');
+    alert(message);
+  };
+
+  const copyContestId = () => {
+    copyToClipboard(contest.contestId, 'Contest ID copied!');
+  };
+
+  const copyJoinLink = () => {
+    const joinLink = `${window.location.protocol}//${window.location.hostname}:${window.location.port || (window.location.protocol === 'https:' ? 443 : 80)}`;
+    copyToClipboard(joinLink, 'Join link copied!');
   };
 
   if (error) return (
@@ -123,14 +132,15 @@ export default function Lobby() {
         </div>
 
         <div className="lobby-id-box">
-          <p className="lobby-id-label">Share this Link</p>
-          <h3>http://192.168.29.216:3000</h3>
+          <p className="lobby-id-label">🔗 Share this Link with Others</p>
+          <p>{window.location.href}</p>
+          <button className="copy-btn" onClick={copyJoinLink}>📋 Copy Link</button>
         </div>
         
         <div className="lobby-id-box">
-          <p className="lobby-id-label">Share this Contest ID</p>
+          <p className="lobby-id-label">📌 Or Share this Contest ID</p>
           <p className="lobby-id mono">{contest.contestId}</p>
-          <button className="copy-btn" onClick={copyContestId}>Copy ID</button>
+          <button className="copy-btn" onClick={copyContestId}>📋 Copy ID</button>
         </div>
 
         <div className="participants-section">

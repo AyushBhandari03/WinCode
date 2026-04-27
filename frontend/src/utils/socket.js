@@ -3,10 +3,7 @@ import { io } from 'socket.io-client';
 let socket = null;
 
 function resolveSocketUrl() {
-  if (process.env.REACT_APP_SOCKET_URL) {
-    return process.env.REACT_APP_SOCKET_URL;
-  }
-
+  // Remove env-based URL to force dynamic resolution
   const { protocol, hostname } = window.location;
   const socketProtocol = protocol === 'https:' ? 'https:' : 'http:';
   return `${socketProtocol}//${hostname}:5000`;

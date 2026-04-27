@@ -1,12 +1,10 @@
 import axios from 'axios';
 
 function resolveApiBaseUrl() {
-	if (process.env.REACT_APP_API_BASE_URL) {
-		return process.env.REACT_APP_API_BASE_URL;
-	}
-
+	// Remove any env-based URL to force dynamic resolution
 	const { protocol, hostname } = window.location;
 	const apiProtocol = protocol === 'https:' ? 'https:' : 'http:';
+	// Use current location's hostname to reach backend (works for localhost, IP, and domain)
 	return `${apiProtocol}//${hostname}:5000/api`;
 }
 

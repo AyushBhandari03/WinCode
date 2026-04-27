@@ -47,8 +47,16 @@ export default function ContestRoom() {
     socket.emit('join_room', { contestId, username });
 
     const onStartContest = (data) => {
-      setProblems(data.problems);
-      setSelectedProblem(data.problems[0]);
+      console.log('🚀 Contest started, problems received:', data.problems);
+      if (data.problems && Array.isArray(data.problems) && data.problems.length > 0) {
+        setProblems(data.problems);
+        setSelectedProblem(data.problems[0]);
+        console.log('✅ Problems set successfully:', data.problems.length, 'problems');
+      } else {
+        console.warn('⚠️ No problems in start_contest event, fetching from API...');
+        // Fallback: fetch contest data which will have problems
+        fetchContest();
+      }
       startTimer(new Date(data.endTime));
     };
     const onLeaderboardUpdate = (data) => {
@@ -99,13 +107,22 @@ export default function ContestRoom() {
       const res = await getContest(contestId);
       const c = res.data;
       setContest(c);
-      setProblems(c.problems);
-      if (c.problems.length > 0) setSelectedProblem(c.problems[0]);
+      
+      // Set problems if available
+      if (c.problems && Array.isArray(c.problems) && c.problems.length > 0) {
+        console.log('📥 Problems fetched from API:', c.problems.length, 'problems');
+        setProblems(c.problems);
+        if (c.problems.length > 0) setSelectedProblem(c.problems[0]);
+      } else {
+        console.warn('⚠️ No problems in API response:', c.problems);
+      }
+      
       setLeaderboard(
         c.participants
           .map(p => ({ username: p.username, problemsSolved: p.problemsSolved, totalTime: p.totalTime }))
           .sort((a, b) => b.problemsSolved - a.problemsSolved || a.totalTime - b.totalTime)
       );
+      
       if (c.status === 'active' && c.endTime) {
         startTimer(new Date(c.endTime));
       }
@@ -113,7 +130,7 @@ export default function ContestRoom() {
         setContestEnded(true);
       }
     } catch (err) {
-      console.error('Failed to fetch contest', err);
+      console.error('❌ Failed to fetch contest', err);
     }
   };
 
