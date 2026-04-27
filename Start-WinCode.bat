@@ -16,15 +16,35 @@ if not exist "%FRONTEND_DIR%\package.json" (
 	exit /b 1
 )
 
+REM Get local IP address
+for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /C:"IPv4 Address" ^| findstr /V "169.254"') do (
+	set "LOCAL_IP=%%a"
+	goto found_ip
+)
+:found_ip
+if defined LOCAL_IP (
+	set "LOCAL_IP=%LOCAL_IP:~1%"
+) else (
+	set "LOCAL_IP=localhost"
+)
+
+echo ======================================
+echo WinCODE Starting
+echo Backend will run on: 0.0.0.0:5000 (accessible via %LOCAL_IP%:5000)
+echo Frontend will run on: 0.0.0.0:3000 (accessible via %LOCAL_IP%:3000)
+echo ======================================
+
 echo Starting backend (npm run dev)...
 start "WinCode Backend" cmd /k "cd /d ""%BACKEND_DIR%"" && npm.cmd run dev"
 
 echo Starting frontend (npm start)...
-start "WinCode Frontend" cmd /k "cd /d ""%FRONTEND_DIR%"" && set BROWSER=none && npm.cmd start"
+start "WinCode Frontend" cmd /k "cd /d ""%FRONTEND_DIR%"" && set BROWSER=none && set HOST= && npm.cmd start"
 
 echo Waiting for frontend to boot...
 timeout /t 6 /nobreak >nul
 
-start "" "http://localhost:3000"
+REM Open browser with the IP address
+echo Opening browser at http://%LOCAL_IP%:3000
+start "" "http://%LOCAL_IP%:3000"
 
 endlocal
